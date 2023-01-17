@@ -10,23 +10,57 @@ import trashIcon from "./assets/trash.svg"
 //コンポーネント
 import EditItemModal from "./components/EditItemModal"
 import CreateItemModal from "./components/CreateItemModal"
-import { showEditModalChange } from "./redux/actions"
 
 // redux関連アクションとか
 import { connect } from 'react-redux'
-import { showEditModalChange, showCreateModalChange } from "../redux/actions"
+import {
+  showEditModalChange, 
+  showCreateModalChange,
+  editTargetItemChange,
+  todoItemDelete,
+  todoItemCreate,
+ } from "./redux/actions"
 
-function App() {
+function App({
+  todoItems,
+  showEditModal,
+  showCreateModal,
+  showEditModalChange,
+  showCreateModalChange,
+  editTargetItemChange,
+  todoItemDelete,
+  todoItemCreate,
+}) {
+  // 擬似的にIDをautoIncrementする
+  const getNewId=()=>{
+    let newId=0
+    todoItems.map(item=>{
+      if(item.id>newId){
+        newId=item.id
+      }
+    })
+    return newId+1
+  }
 
+  const createItemFunc=()=>{
+    // 擬似的に空のアイテムを追加します
+    const newItemId=getNewId()
+    const newItem = {id:newItemId,title:"",state:"",url:"",createdAt:"",updatedAt:""} 
+    console.log(newItem)
+    todoItemCreate(newItem)
+    editTargetItemChange(newItem)
+    showEditModalChange()
+
+  }
   const editItemFunc=(id)=>{
+    editTargetItemChange(id)
     showEditModalChange()
     
-    console.log("edit"+id)
   }
   const deleteItemFunc=(id)=>{
-    
-    console.log("delete" + id)
+    todoItemDelete(id)
   }
+
 
   return (
     <div className="App">
@@ -38,29 +72,31 @@ function App() {
           <th>URL</th> 
           <th>Created At</th> 
           <th>Updated At</th> 
-          <th>+</th> 
+          <th><button onClick={createItemFunc} >+</button></th> 
           <th></th> 
         </tr></thead>
         <tbody>
           
-            {itemsData.items.map((item)=> 
+            {todoItems && todoItems.map(item => (
             <tr key={item.id}>
               <td> {item.id}</td>
               <td> {item.title}</td>
               <td> {item.state}</td>
               <td> {item.url}</td>
-              <td> {item.created_at}</td>
-              <td> {item.updated_at}</td>
-              <td><img src={penIcon} width="20" onClick={()=>editItemFunc(item.id)} alt="" /></td>
+              <td> {item.createdAt}</td>
+              <td> {item.updatedAt}</td>
+              <td><img src={penIcon} width="20" onClick={()=>editItemFunc(item)} alt="" /></td>
               <td><img src={trashIcon} width="20" onClick={()=>deleteItemFunc(item.id)} alt="" /></td>
             </tr>
-            )}
+            ))}
         </tbody>
         
       </table>
+      
+
       {showEditModal? 
       <EditItemModal 
-       id = {0}
+       
       />
         :<></>
       }
@@ -72,5 +108,22 @@ function App() {
     </div>
   )
 }
+const mapStateToProps = (state) => {
+  return {
+    todoItems: state.todoItems,
+    showEditModal: state.showEditModal,
+    showCreateModal: state.showCreateModal
+  }
+}
 
-export default App
+const mapDispatchToProps = (dispatch) => {
+  return {
+    showEditModalChange: () => dispatch(showEditModalChange()),
+    showCreateModalChange: () => dispatch(showCreateModalChange()),
+    editTargetItemChange:(id)=>dispatch(editTargetItemChange(id)),
+    todoItemDelete:(id)=>dispatch(todoItemDelete(id)),
+    todoItemCreate:(item)=>dispatch(todoItemCreate(item)),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

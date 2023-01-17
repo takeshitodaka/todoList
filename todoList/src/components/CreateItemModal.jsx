@@ -7,7 +7,7 @@ const CreateItemModal= (id)=>{
     return (
         <div id="overlay">
           <div id="content">
-            <p>これがモーダルウィンドウです。</p>
+            <p>これはクリエイトのモーダルウィンドウです。</p>
             <p><button onClick={addItem}>add</button></p>
             <p><button>close</button></p>
           </div>
